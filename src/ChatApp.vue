@@ -17,11 +17,8 @@
   import { onMounted, ref } from 'vue';
   import { defineStore } from 'pinia'
   
-  import {ChatInput} from "@mobilon-dev/chotto";
-  import {ChatList} from "@mobilon-dev/chotto";
-  import {ChatInfo} from "@mobilon-dev/chotto";
-  import {MessageFeed} from "@mobilon-dev/chotto";
-  import {Profile} from "@mobilon-dev/chotto";
+  import {ChatInput,
+    ChatList, ChatInfo, MessageFeed, Profile} from "@mobilon-dev/chotto";
   
   // Define props
   const props = defineProps({

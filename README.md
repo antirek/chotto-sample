@@ -1,1 +1,5 @@
 # chotto-sample
+
+Пример использования @mobilon-dev/chotto
+
+[@mobilon-dev/chotto](https://github.com/mobilon-dev/chotto)
