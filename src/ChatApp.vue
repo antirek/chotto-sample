@@ -4,7 +4,7 @@
   
       <div v-if="selectedChat">
         <ChatInfo :chat="selectedChat"/>
-        <MessageFeed :messages="messages" />
+        <Feed :objects="messages" />
         <ChatInput @send="addMessage" />
       </div>
       <p v-else>Выберите контакт для начала общения</p>
@@ -17,8 +17,13 @@
   import { onMounted, ref } from 'vue';
   import { defineStore } from 'pinia'
   
-  import {ChatInput,
-    ChatList, ChatInfo, MessageFeed, Profile} from "@mobilon-dev/chotto";
+  import {
+    ChatInput,
+    ChatList, 
+    ChatInfo, 
+    Feed, 
+    Profile,
+  } from "@mobilon-dev/chotto";
   
   // Define props
   const props = defineProps({
