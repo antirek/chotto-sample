@@ -1,6 +1,6 @@
 <template>
     <div class="chat-app">
-      <ChatList :chats="chatsStore.chats" @select="selectChat" />
+      <ChatList2 :chats="chatsStore.chats" @select="selectChat" :filterEnabled="true" />
   
       <div v-if="selectedChat">
         <ChatInfo :chat="selectedChat"/>
@@ -19,7 +19,7 @@
   
   import {
     ChatInput,
-    ChatList, 
+    ChatList2, 
     ChatInfo, 
     Feed, 
     Profile,
