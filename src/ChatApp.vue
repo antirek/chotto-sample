@@ -1,119 +1,182 @@
 <template>
-    <div class="chat-app">
-      <ChatList2 :chats="chatsStore.chats" @select="selectChat" :filterEnabled="true" />
-  
-      <div v-if="selectedChat">
-        <ChatInfo :chat="selectedChat"/>
-        <Feed :objects="messages" />
-        <ChatInput @send="addMessage" />
+  <div class="chat-app">
+    <div class="chat-app__container">
+      <ChatList2 :chats="chatsStore.chats" @select="selectChat" filterEnabled />
+
+      <div class="chat-app__right-bar">
+        <div v-if="selectedChat" class="chat-app__right-bar-container">
+          <ChatInfo :chat="selectedChat" />
+          <Feed class="chat-app__feed" :objects="messages" />
+          <ChatInput @send="addMessage" :enableEmoji="true" :channels="channels" />
+        </div>
+        <p v-else class="chat-app__welcome-text">Выберите контакт для начала общения</p>
       </div>
-      <p v-else>Выберите контакт для начала общения</p>
-  
-      <Profile :user="userProfile" />
+
     </div>
-  </template>
-  
-  <script setup>
-  import { onMounted, ref } from 'vue';
-  import { defineStore } from 'pinia'
-  
-  import {
-    ChatInput,
-    ChatList2, 
-    ChatInfo, 
-    Feed, 
-    Profile,
-  } from "@mobilon-dev/chotto";
-  
-  // Define props
-  const props = defineProps({
-    authProvider: {
-      type: Object,
-      required: true,
-    },
-    dataProvider: {
-      type: Object,
-      required: true,
-    },
-    eventor: {
-      type: Object,
-      required: true,
-    },
-  });
-  
-  const useChatsStore = defineStore('chats', () => {
-    const chats = ref([])
-  
-    function setUnreadCounter(chatId, countUnread) {
-      const chat = chats.value.find(c => c.chatId === chatId);
-      chat.countUnread = countUnread;
-    }
-    return { chats, setUnreadCounter }
-  })
-  
-  const chatsStore = useChatsStore();
-  
-  // Reactive data
-  const selectedChat = ref(null);
-  const messages = ref([]);
-  const userProfile = ref({});
-  
-  // Methods
-  const getUserProfile = () => {
-    return props.authProvider.getUserProfile();
-  };
-  
-  const getFeed = () => {
-    // console.log('get feed')
-    if (selectedChat.value) {
-      return props.dataProvider.getFeed(selectedChat.value.chatId);
-    } else {
-      return [];
-    }
-  };
-  
-  const addMessage = (message) => {
-    props.dataProvider.addMessage({
-      text: message,
-      type: 'message.text',
-      chatId: selectedChat.value.chatId,
-      direction: 'outgoing',
-      timestamp: new Date().toLocaleTimeString(),
-    });
-    messages.value = getFeed();  // Обновление сообщений
-  };
-  
-  const selectChat = (chat) => {
-    selectedChat.value = chat;
-    chatsStore.setUnreadCounter(chat.chatId, 0);
-    messages.value = getFeed(); // Обновляем сообщения при выборе контакта
-  };
-  
-  const handleEvent = (event) => {
-    if (event.type === 'message') {        
-      chatsStore.setUnreadCounter(event.data.chatId, 1);
-      if (selectedChat?.value?.chatId) {
-        messages.value = props.dataProvider.getFeed(selectedChat.value.chatId);
-      }
-    } else if (event.type === 'notification') {
-      console.log('Системное уведомление:', event.data.text);
-    }
-  };
-  
-  // Lifecycle hook
-  onMounted(() => {
-    // console.log('mounted')
-    props.eventor.subscribe(handleEvent);
-    userProfile.value = props.authProvider.getUserProfile();
-    chatsStore.chats = props.dataProvider.getChats();
-  });
-  </script>
-  
-  <style scoped>
-  .chat-app {
-    display: grid;
-    grid-template-columns: 1fr 3fr 1fr ;
-    gap: 16px;
+
+  </div>
+</template>
+
+<script setup>
+import { onMounted, ref } from 'vue';
+import { defineStore } from 'pinia'
+
+import {
+  ChatInput,
+  ChatList2,
+  ChatInfo,
+  Feed,
+  Profile,
+  insertDaySeparators,
+  formatTimestamp,
+  playNotificationAudio,
+  sortByTimestamp,
+} from "@mobilon-dev/chotto";
+
+// Define props
+const props = defineProps({
+  authProvider: {
+    type: Object,
+    required: true,
+  },
+  dataProvider: {
+    type: Object,
+    required: true,
+  },
+  eventor: {
+    type: Object,
+    required: true,
+  },
+});
+
+
+const useChatsStore = defineStore('chats', () => {
+  const chats = ref([])
+
+  function setUnreadCounter(chatId, countUnread) {
+    const chat = chats.value.find(c => c.chatId === chatId);
+    chat.countUnread = countUnread;
   }
-  </style>
-  
+  return { chats, setUnreadCounter }
+})
+
+const chatsStore = useChatsStore();
+
+// Reactive data
+const selectedChat = ref(null);
+const messages = ref([]);
+const userProfile = ref({});
+const channels = ref([]);
+
+
+const readableFormat = (timestamp) => {
+  // @todo: преобразование timestamp в читаемый вид
+  return formatTimestamp(timestamp);
+}
+
+// Methods
+const getFeedObjects = () => {
+  // console.log('get feed')
+  if (selectedChat.value) {
+    // здесь обработка для передачи сообщений в feed
+    const messages = props.dataProvider.getFeed(selectedChat.value.chatId);
+
+    // а. сортировка по timestamp
+    const messages1 = sortByTimestamp(messages);
+
+    // б. переформатирование
+    const messages2 = messages1.map((m) => {
+      return {
+        ...m,
+        position: m.direction === 'outgoing' ? 'right' : 'left',
+        time: readableFormat(m.timestamp),
+      };
+    });
+
+    // в. вставка временных отсечек
+    const messages3 = insertDaySeparators(messages2);
+
+    return messages3;
+  } else {
+    return [];
+  }
+};
+
+
+const addMessage = (message) => {
+  props.dataProvider.addMessage({
+    text: message,
+    type: 'message.text',
+    chatId: selectedChat.value.chatId,
+    direction: 'outgoing',
+    timestamp: '1727112546',
+  });
+  messages.value = getFeedObjects();  // Обновление сообщений
+};
+
+const selectChat = (chat) => {
+  selectedChat.value = chat;
+  chatsStore.setUnreadCounter(chat.chatId, 0);
+  messages.value = getFeedObjects(); // Обновляем сообщения при выборе контакта
+};
+
+const handleEvent = async (event) => {
+  if (event.type === 'message') {
+    chatsStore.setUnreadCounter(event.data.chatId, 1);
+    if (selectedChat?.value?.chatId) {
+      messages.value = getFeedObjects();
+    }
+    await playNotificationAudio();
+  } else if (event.type === 'notification') {
+    console.log('Системное уведомление:', event.data.text);
+  }
+};
+
+// Lifecycle hook
+onMounted(() => {
+  // console.log('mounted')
+  props.eventor.subscribe(handleEvent);
+  userProfile.value = props.authProvider.getUserProfile();
+  chatsStore.chats = props.dataProvider.getChats();
+  channels.value = props.dataProvider.getChannels();
+});
+</script>
+
+<style scoped lang="scss">
+.chat-app {
+  &__container {
+    display: grid;
+    grid-template-columns: 1.25fr 3fr;
+  }
+
+  &__right-bar {
+    position: relative;
+    margin: 30px 0;
+    height: calc(100vh - 60px);
+    background-color: var(--neutral-100);
+    border-radius: 12px;
+  }
+
+  &__right-bar-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  &__welcome-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.dark {
+  .chat-app {
+    &__right-bar {
+      background-color: var(--neutral-800);
+    }
+  }
+
+}
+</style>
