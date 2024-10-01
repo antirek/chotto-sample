@@ -4,7 +4,11 @@ import { createApp } from 'vue'
 import App from './App.vue'
 
 import { createPinia } from 'pinia'
+
 import '/node_modules/@mobilon-dev/chotto/dist/style.css';
+import '/node_modules/@mobilon-dev/chotto/dist/global.css';
+import '/node_modules/@mobilon-dev/chotto/dist/variables.css';
+import '/node_modules/@mobilon-dev/chotto/dist/light.css';
 
 const pinia = createPinia()
 const app = createApp(App);
