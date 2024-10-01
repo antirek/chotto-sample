@@ -7,7 +7,7 @@
         <div v-if="selectedChat" class="chat-app__right-bar-container">
           <ChatInfo :chat="selectedChat" />
           <Feed class="chat-app__feed" :objects="messages" />
-          <ChatInput @send="addMessage" :enableEmoji="true" :channels="channels" />
+          <ChatInput2 @send="addMessage" :enableEmoji="true" :channels="channels" />
         </div>
         <p v-else class="chat-app__welcome-text">Выберите контакт для начала общения</p>
       </div>
@@ -22,7 +22,7 @@ import { onMounted, ref } from 'vue';
 import { defineStore } from 'pinia'
 
 import {
-  ChatInput,
+  ChatInput2,
   ChatList2,
   ChatInfo,
   Feed,

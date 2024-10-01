@@ -48,6 +48,9 @@ const dataProvider = {
   getChats() {
     return data3.chats;
   },
+  getChannels() {
+    return [];
+  }, 
   addMessage(message) {
     data3.messages.push(message);
     console.log("Добавлено новое сообщение:", message);
