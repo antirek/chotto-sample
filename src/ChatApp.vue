@@ -1,19 +1,19 @@
 <template>
   <div class="chat-app">
-    <div class="chat-app__container">
-      <ChatList :chats="chatsStore.chats" @select="selectChat" filterEnabled />
-
+    <div class="chat-app__container">      
+      <div>
+        <ChatList :chats="chatsStore.chats" @select="selectChat" filterEnabled />
+        <ThemeMode :themes="themes" />
+      </div>
       <div class="chat-app__right-bar">
         <div v-if="selectedChat" class="chat-app__right-bar-container">
           <ChatInfo :chat="selectedChat" />
-          <Feed class="chat-app__feed" :objects="messages" />
+          <Feed :objects="messages" />
           <ChatInput @send="addMessage" :enableEmoji="true" :channels="channels" />
         </div>
         <p v-else class="chat-app__welcome-text">Выберите контакт для начала общения</p>
       </div>
-
     </div>
-
   </div>
 </template>
 
@@ -26,7 +26,8 @@ import {
   ChatList,
   ChatInfo,
   Feed,
-  Profile,
+  UserProfile,
+  ThemeMode,
   insertDaySeparators,
   formatTimestamp,
   playNotificationAudio,
@@ -67,6 +68,26 @@ const selectedChat = ref(null);
 const messages = ref([]);
 const userProfile = ref({});
 const channels = ref([]);
+
+const themes = [
+  {
+    code: 'light',
+    name: 'Light',
+  },
+  {
+    code: 'dark',
+    name: 'Dark',
+  },
+  {
+    code: 'green',
+    name: 'Green',
+  },
+  {
+    code: 'special',
+    name: 'Special theme',
+  },
+];
+
 
 
 const readableFormat = (timestamp) => {
@@ -171,12 +192,4 @@ onMounted(() => {
   }
 }
 
-.dark {
-  .chat-app {
-    &__right-bar {
-      background-color: var(--neutral-800);
-    }
-  }
-
-}
 </style>

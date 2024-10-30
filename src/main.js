@@ -6,6 +6,7 @@ import App from './App.vue'
 import { createPinia } from 'pinia'
 
 import '/node_modules/@mobilon-dev/chotto/dist/style.css';
+import './assets/themes/special.css'
 
 const pinia = createPinia()
 const app = createApp(App);
