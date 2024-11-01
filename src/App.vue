@@ -20,7 +20,9 @@ const data3 = {
     { chatId: 2, type: "message.image", url: "https://nationaltoday.com/wp-content/uploads/2022/05/Sun-Day--1200x834.jpg", alt: "Example Image", direction: 'outgoing', timestamp: '1726743559', },
   ],
   chats: [
-    { chatId: 1, name: "Василий", countUnread: 0, lastMessage: 'test', 'lastActivity.time': 'час назад', },
+    { chatId: 1, name: "Василий", countUnread: 0, lastMessage: 'test', 'lastActivity.time': 'час назад', actions: [
+      {action: 'add', title: 'добавить'},
+    ]},
     { chatId: 2, name: "Мария", countUnread: 0 },
   ],
 };

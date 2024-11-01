@@ -2,7 +2,12 @@
   <div class="chat-app">
     <div class="chat-app__container">      
       <div>
-        <ChatList :chats="chatsStore.chats" @select="selectChat" filterEnabled />
+        <ChatList 
+          :chats="chatsStore.chats"
+          @select="selectChat"
+          filterEnabled
+          @action="chatAction"
+        />
         <ThemeMode :themes="themes" />
       </div>
       <div class="chat-app__right-bar">
@@ -14,12 +19,21 @@
         <p v-else class="chat-app__welcome-text">Выберите контакт для начала общения</p>
       </div>
     </div>
+
+    <SelectUser
+      v-if="modalShow"
+      :title="modalTitle"
+      :users="users"
+      @confirm="selectUsers"
+      @close="onCloseModal"
+    />
   </div>
 </template>
 
 <script setup>
 import { onMounted, ref } from 'vue';
 import { defineStore } from 'pinia'
+
 
 import {
   ChatInput,
@@ -32,6 +46,7 @@ import {
   formatTimestamp,
   playNotificationAudio,
   sortByTimestamp,
+  SelectUser,
 } from "@mobilon-dev/chotto";
 
 // Define props
@@ -68,6 +83,9 @@ const selectedChat = ref(null);
 const messages = ref([]);
 const userProfile = ref({});
 const channels = ref([]);
+const users = ref([]);
+const modalShow = ref(false)
+const modalTitle = ref('')
 
 const themes = [
   {
@@ -88,7 +106,31 @@ const themes = [
   },
 ];
 
+const getUsers = () => {
+  return [
+    {userId: 'testUserId', name: 'test test test'}
+  ]
+}
 
+
+const chatAction = (data) => {
+  console.log('chat action', data);
+  if (data.action === 'add') {
+    modalTitle.value = `Добавить в чат ${data.chatId}`;
+    users.value = getUsers();
+    modalShow.value = true;
+  }
+
+}
+
+
+const selectUsers = (users) => {
+  console.log('users selected', users);
+}
+
+const onCloseModal = () => {
+  modalShow.value = false;
+}
 
 const readableFormat = (timestamp) => {
   // @todo: преобразование timestamp в читаемый вид
